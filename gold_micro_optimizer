@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+
+echo "========================================"
+echo " Gold Micro Optimizer (Decision Tool)"
+echo "========================================"
+echo
+
+# ----------------------------------------
+# CONFIG FILE
+# ----------------------------------------
+
+CONFIG_FILE="${HOME}/.gold_micro_optimizer_history"
+
+# Load previous values if config file exists
+if [[ -f "$CONFIG_FILE" ]]; then
+  source "$CONFIG_FILE"
+fi
+
+# ----------------------------------------
+# INPUTS
+# ----------------------------------------
+
+# Helper function to read with default value (works across bash versions)
+read_with_default() {
+  local prompt="$1"
+  local default="$2"
+  local var_name="$3"
+  
+  # Try to use -i option if available (bash 4.0+)
+  if [[ "${BASH_VERSION%%.*}" -ge 4 ]]; then
+    read -e -i "$default" -p "$prompt: " "$var_name"
+  else
+    # Fallback for older bash: show default clearly
+    if [[ -n "$default" ]]; then
+      printf "%s [%s]: " "$prompt" "$default"
+    else
+      printf "%s: " "$prompt"
+    fi
+    read -e input
+    # Use input if provided, otherwise use default
+    if [[ -z "$input" ]]; then
+      eval "$var_name=\"$default\""
+    else
+      eval "$var_name=\"$input\""
+    fi
+  fi
+}
+
+read_with_default "Bank buy-back price (RM per 1g)" "${BANK_BUYBACK:-}" BANK_BUYBACK
+
+echo
+echo "Enter TODAY'S prices from the app:"
+if [[ "${BASH_VERSION%%.*}" -ge 4 ]]; then
+  echo "(Previous values are pre-filled - edit as needed, press Enter to keep)"
+else
+  echo "(Previous values shown in brackets - press Enter to keep, or type new value)"
+fi
+
+read_with_default "Price for 0.015g (RM)" "${P015:-}" P015
+read_with_default "Price for 0.016g (RM)" "${P016:-}" P016
+read_with_default "Price for 0.017g (RM)" "${P017:-}" P017
+read_with_default "Price for 0.018g (RM)" "${P018:-}" P018
+read_with_default "Price for 0.020g (RM)" "${P020:-}" P020
+read_with_default "Price for 0.025g (RM)" "${P025:-}" P025
+
+# Save current values to config file
+cat > "$CONFIG_FILE" <<EOF
+BANK_BUYBACK=$BANK_BUYBACK
+P015=$P015
+P016=$P016
+P017=$P017
+P018=$P018
+P020=$P020
+P025=$P025
+EOF
+
+OPTIONS=(
+  "0.015 $P015"
+  "0.016 $P016"
+  "0.017 $P017"
+  "0.018 $P018"
+  "0.020 $P020"
+  "0.025 $P025"
+)
+
+# ----------------------------------------
+# MICRO GOLD CALCULATIONS
+# ----------------------------------------
+
+echo
+echo "=== Individual Micro Gold Calculations ==="
+printf "%-6s %-8s %-10s %-12s %-12s\n" "Gram" "RM" "RM/g" "Bank Value" "Profit/Loss"
+
+BEST_MICRO=""
+BEST_MICRO_RMPERG=999999
+
+for opt in "${OPTIONS[@]}"; do
+  read g rm <<< "$opt"
+
+  rm_per_g=$(awk "BEGIN {print $rm / $g}")
+  bank_value=$(awk "BEGIN {print $g * $BANK_BUYBACK}")
+  profit=$(awk "BEGIN {print $bank_value - $rm}")
+
+  printf "%-6s %-8.2f %-10.2f %-12.2f %-12.2f\n" \
+    "$g" "$rm" "$rm_per_g" "$bank_value" "$profit"
+
+  if awk "BEGIN {exit !($rm_per_g < $BEST_MICRO_RMPERG)}"; then
+    BEST_MICRO_RMPERG="$rm_per_g"
+    BEST_MICRO="$g g @ RM$rm"
+  fi
+done
+
+echo
+echo "=== Calculation to Reach ~1g (Rounded Up Units) ==="
+printf "%-6s %-6s %-10s %-12s %-12s %-12s\n" "Gram" "Units" "Total(g)" "Total(RM)" "Actual RM/g" "Bank Value"
+
+BEST_ACTUAL_MICRO=""
+BEST_ACTUAL_RMPERG=999999
+
+for opt in "${OPTIONS[@]}"; do
+  read g rm <<< "$opt"
+
+  # Calculate units needed to reach at least 1g (rounded up)
+  units_needed=$(awk "BEGIN {printf \"%.0f\", (1.0 / $g) + 0.5}")
+  if awk "BEGIN {exit !($units_needed * $g < 1.0)}"; then
+    units_needed=$((units_needed + 1))
+  fi
+  
+  total_grams=$(awk "BEGIN {print $units_needed * $g}")
+  total_cost=$(awk "BEGIN {print $units_needed * $rm}")
+  actual_rm_per_g=$(awk "BEGIN {print $total_cost / $total_grams}")
+  bank_value_total=$(awk "BEGIN {print $total_grams * $BANK_BUYBACK}")
+
+  printf "%-6s %-6d %-10.3f %-12.2f %-12.2f %-12.2f\n" \
+    "$g" "$units_needed" "$total_grams" "$total_cost" "$actual_rm_per_g" "$bank_value_total"
+
+  if awk "BEGIN {exit !($actual_rm_per_g < $BEST_ACTUAL_RMPERG)}"; then
+    BEST_ACTUAL_RMPERG="$actual_rm_per_g"
+    BEST_ACTUAL_MICRO="$g g (${units_needed} units = ${total_grams}g @ RM${total_cost})"
+  fi
+done
+
+# ----------------------------------------
+# RECOMMENDATION
+# ----------------------------------------
+
+echo
+echo "=== ⭐ Best Recommendation (Lowest Actual RM/g) ==="
+echo "Best option: $BEST_ACTUAL_MICRO"
+echo "(This has the lowest actual RM/g when buying units to reach ~1g)"
+echo "Note: Units are rounded up to reach at least 1g, so actual grams may be slightly more."
+
+echo
+echo "=== Decision Summary ==="
+echo "• Recommendation: $BEST_ACTUAL_MICRO (lowest actual RM/g)"
+echo "• This gives you the most gold for your money"
+echo "• Negative profit means paying premium for accumulation"
+echo "• Use this daily to avoid emotional or UI-driven buys"
+echo
+
+exit 0

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Micro Optimizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+            color: #333;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #d4af37;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 5px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-field label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .input-field input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .results-table thead {
+            background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+            color: #333;
+        }
+
+        .results-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .results-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .best-row {
+            background: #fff9e6 !important;
+            font-weight: 600;
+        }
+
+        .profit-positive {
+            color: #10b981;
+        }
+
+        .profit-negative {
+            color: #ef4444;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .recommendation h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .recommendation p {
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .summary ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .summary li {
+            padding: 8px 0;
+            color: #555;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary li:last-child {
+            border-bottom: none;
+        }
+
+        .summary li::before {
+            content: "• ";
+            color: #d4af37;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+
+        .disclaimer h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .disclaimer p {
+            color: #856404;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .disclaimer p:last-child {
+            margin-bottom: 0;
+        }
+
+        .disclaimer a {
+            color: #856404;
+            text-decoration: underline;
+        }
+
+        .disclaimer a:hover {
+            color: #d4af37;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .info-box p {
+            color: #0d47a1;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .info-box p:not(:last-child) {
+            margin-bottom: 8px;
+        }
+
+        .info-box a {
+            color: #0d47a1;
+            text-decoration: underline;
+        }
+
+        .info-box a:hover {
+            color: #1976D2;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .results-table {
+                font-size: 0.9em;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gold Micro Optimizer</h1>
+            <p>Decision Tool for Micro Gold Purchases</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">Input Values</div>
+                
+                <div class="info-box">
+                    <p><strong>ℹ️ About this tool:</strong> This calculator helps users buying micro gold from <a href="https://www.maybank.com/islamic/en/investment/maybank-islamic-gold-account-i.page" target="_blank" rel="noopener noreferrer">Maybank Islamic Gold Account-i</a>.</p>
+                    <p><strong>📝 Note:</strong> Previous values are automatically loaded. Please update these values if there are any changes to the current prices.</p>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="bankBuyback">Bank Buy-back Price (RM per 1g)</label>
+                        <input type="number" id="bankBuyback" step="0.01" placeholder="e.g., 643.00">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="p015">Price for 0.015g (RM)</label>
+                        <input type="number" id="p015" step="0.01" placeholder="e.g., 10.00">
+                    </div>
+                    <div class="input-field">
+                        <label for="p016">Price for 0.016g (RM)</label>
+                        <input type="number" id="p016" step="0.01" placeholder="e.g., 10.19">
+                    </div>
+                    <div class="input-field">
+                        <label for="p017">Price for 0.017g (RM)</label>
+                        <input type="number" id="p017" step="0.01" placeholder="e.g., 10.85">
+                    </div>
+                    <div class="input-field">
+                        <label for="p018">Price for 0.018g (RM)</label>
+                        <input type="number" id="p018" step="0.01" placeholder="e.g., 11.51">
+                    </div>
+                    <div class="input-field">
+                        <label for="p020">Price for 0.020g (RM)</label>
+                        <input type="number" id="p020" step="0.01" placeholder="e.g., 12.82">
+                    </div>
+                    <div class="input-field">
+                        <label for="p025">Price for 0.025g (RM)</label>
+                        <input type="number" id="p025" step="0.01" placeholder="e.g., 16.11">
+                    </div>
+                </div>
+                <button class="btn" onclick="calculate()">Calculate</button>
+            </div>
+
+            <div id="results" style="display: none;">
+                <div class="section">
+                    <div class="section-title">Individual Micro Gold Calculations</div>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Gram</th>
+                                <th>RM</th>
+                                <th>RM/g</th>
+                                <th>Bank Value</th>
+                                <th>Profit/Loss</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Calculation to Reach ~1g (Rounded Up Units)</div>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Gram</th>
+                                <th>Units</th>
+                                <th>Total (g)</th>
+                                <th>Total (RM)</th>
+                                <th>Actual RM/g</th>
+                                <th>Bank Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roundedResultsBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="recommendation"></div>
+
+                <div class="summary">
+                    <div class="section-title">Decision Summary</div>
+                    <ul id="summaryList"></ul>
+                </div>
+            </div>
+
+            <div class="disclaimer">
+                <h4>📝 Note</h4>
+                <p>This web page is based on <a href="https://goldcalculator-sikucing.vercel.app/" target="_blank" rel="noopener noreferrer">Kalkulator Emas by Si Kucing</a>.</p>
+                <p>This tool is designed to help users buying micro gold from <a href="https://www.maybank.com/islamic/en/investment/maybank-islamic-gold-account-i.page" target="_blank" rel="noopener noreferrer">Maybank Islamic Gold Account-i</a>.</p>
+                
+                <h4>⚠️ Penafian (Disclaimer)</h4>
+                <p><strong>Pihak pembangun tidak bertanggungjawab atas sebarang kerugian atau kerosakan yang dialami akibat bergantung kepada maklumat di laman web ini. Data dipaparkan sebagai rujukan sahaja.</strong></p>
+                <p><em>The developer is not responsible for any losses or damages incurred as a result of relying on information on this website. Data is displayed for reference only.</em></p>
+                
+                <h4>ℹ️ Nota Penting (Important Note)</h4>
+                <p><strong>Harga emas tidak akan berubah pada hari Sabtu dan Ahad (Pasaran Global Tutup).</strong></p>
+                <p><em>Gold prices will not change on Saturday and Sunday (Global Market Closed).</em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved values from localStorage
+        function loadSavedValues() {
+            const saved = localStorage.getItem('goldOptimizer');
+            if (saved) {
+                const values = JSON.parse(saved);
+                document.getElementById('bankBuyback').value = values.bankBuyback || '';
+                document.getElementById('p015').value = values.p015 || '';
+                document.getElementById('p016').value = values.p016 || '';
+                document.getElementById('p017').value = values.p017 || '';
+                document.getElementById('p018').value = values.p018 || '';
+                document.getElementById('p020').value = values.p020 || '';
+                document.getElementById('p025').value = values.p025 || '';
+            }
+        }
+
+        // Save values to localStorage
+        function saveValues() {
+            const values = {
+                bankBuyback: document.getElementById('bankBuyback').value,
+                p015: document.getElementById('p015').value,
+                p016: document.getElementById('p016').value,
+                p017: document.getElementById('p017').value,
+                p018: document.getElementById('p018').value,
+                p020: document.getElementById('p020').value,
+                p025: document.getElementById('p025').value
+            };
+            localStorage.setItem('goldOptimizer', JSON.stringify(values));
+        }
+
+        // Calculate and display results
+        function calculate() {
+            const bankBuyback = parseFloat(document.getElementById('bankBuyback').value);
+            if (!bankBuyback || bankBuyback <= 0) {
+                alert('Please enter a valid bank buy-back price');
+                return;
+            }
+
+            const options = [
+                { gram: 0.015, price: parseFloat(document.getElementById('p015').value) || 0 },
+                { gram: 0.016, price: parseFloat(document.getElementById('p016').value) || 0 },
+                { gram: 0.017, price: parseFloat(document.getElementById('p017').value) || 0 },
+                { gram: 0.018, price: parseFloat(document.getElementById('p018').value) || 0 },
+                { gram: 0.020, price: parseFloat(document.getElementById('p020').value) || 0 },
+                { gram: 0.025, price: parseFloat(document.getElementById('p025').value) || 0 }
+            ];
+
+            // Filter out options with zero price
+            const validOptions = options.filter(opt => opt.price > 0);
+
+            if (validOptions.length === 0) {
+                alert('Please enter at least one price');
+                return;
+            }
+
+            // Save values
+            saveValues();
+
+            // Calculate for each option (theoretical per unit)
+            let bestMicro = null;
+            let bestRmPerG = Infinity;
+            const results = [];
+
+            validOptions.forEach(opt => {
+                const rmPerG = opt.price / opt.gram;
+                const bankValue = opt.gram * bankBuyback;
+                const profit = bankValue - opt.price;
+
+                results.push({
+                    gram: opt.gram,
+                    price: opt.price,
+                    rmPerG: rmPerG,
+                    bankValue: bankValue,
+                    profit: profit
+                });
+
+                if (rmPerG < bestRmPerG) {
+                    bestRmPerG = rmPerG;
+                    bestMicro = opt;
+                }
+            });
+
+            // Calculate rounded-up units to reach ~1g
+            let bestActualMicro = null;
+            let bestActualRmPerG = Infinity;
+            const roundedResults = [];
+
+            validOptions.forEach(opt => {
+                // Calculate units needed to reach at least 1g (rounded up)
+                let unitsNeeded = Math.ceil(1.0 / opt.gram);
+                // Double check we actually reach 1g
+                if (unitsNeeded * opt.gram < 1.0) {
+                    unitsNeeded += 1;
+                }
+                
+                const totalGrams = unitsNeeded * opt.gram;
+                const totalCost = unitsNeeded * opt.price;
+                const actualRmPerG = totalCost / totalGrams;
+                const bankValueTotal = totalGrams * bankBuyback;
+
+                roundedResults.push({
+                    gram: opt.gram,
+                    units: unitsNeeded,
+                    totalGrams: totalGrams,
+                    totalCost: totalCost,
+                    actualRmPerG: actualRmPerG,
+                    bankValue: bankValueTotal
+                });
+
+                if (actualRmPerG < bestActualRmPerG) {
+                    bestActualRmPerG = actualRmPerG;
+                    bestActualMicro = {
+                        gram: opt.gram,
+                        units: unitsNeeded,
+                        totalGrams: totalGrams,
+                        totalCost: totalCost
+                    };
+                }
+            });
+
+            // Display results table (theoretical)
+            const tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = '';
+
+            results.forEach(result => {
+                const row = document.createElement('tr');
+                const isBest = result.gram === bestMicro.gram && result.price === bestMicro.price;
+                
+                if (isBest) {
+                    row.className = 'best-row';
+                }
+
+                row.innerHTML = `
+                    <td>${result.gram.toFixed(3)}g</td>
+                    <td>RM${result.price.toFixed(2)}</td>
+                    <td>RM${result.rmPerG.toFixed(2)}/g</td>
+                    <td>RM${result.bankValue.toFixed(2)}</td>
+                    <td class="${result.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                        RM${result.profit >= 0 ? '+' : ''}${result.profit.toFixed(2)}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Display rounded-up results table
+            const roundedTbody = document.getElementById('roundedResultsBody');
+            roundedTbody.innerHTML = '';
+
+            roundedResults.forEach(result => {
+                const row = document.createElement('tr');
+                const isBest = result.gram === bestActualMicro.gram;
+                
+                if (isBest) {
+                    row.className = 'best-row';
+                }
+
+                row.innerHTML = `
+                    <td>${result.gram.toFixed(3)}g</td>
+                    <td>${result.units}</td>
+                    <td>${result.totalGrams.toFixed(3)}g</td>
+                    <td>RM${result.totalCost.toFixed(2)}</td>
+                    <td>RM${result.actualRmPerG.toFixed(2)}/g</td>
+                    <td>RM${result.bankValue.toFixed(2)}</td>
+                `;
+                roundedTbody.appendChild(row);
+            });
+
+            // Display recommendation based on actual RM/g
+            const recommendationDiv = document.getElementById('recommendation');
+            recommendationDiv.innerHTML = `
+                <div class="recommendation">
+                    <h3>⭐ Best Recommendation (Lowest Actual RM/g)</h3>
+                    <p><strong>Best option:</strong> ${bestActualMicro.gram.toFixed(3)}g - Buy ${bestActualMicro.units} units = ${bestActualMicro.totalGrams.toFixed(3)}g @ RM${bestActualMicro.totalCost.toFixed(2)}</p>
+                    <p>This has the lowest actual RM/g (${bestActualRmPerG.toFixed(2)} RM/g) when buying units to reach ~1g.</p>
+                    <p><em>Note: Units are rounded up to reach at least 1g, so actual grams may be slightly more.</em></p>
+                </div>
+            `;
+
+            // Display summary
+            const summaryList = document.getElementById('summaryList');
+            summaryList.innerHTML = `
+                <li>Recommendation: ${bestActualMicro.gram.toFixed(3)}g - Buy ${bestActualMicro.units} units = ${bestActualMicro.totalGrams.toFixed(3)}g @ RM${bestActualMicro.totalCost.toFixed(2)} (lowest actual RM/g)</li>
+                <li>This gives you the most gold for your money</li>
+                <li>Units are rounded up to reach at least 1g, so actual grams may be slightly more</li>
+                <li>Negative profit means paying premium for accumulation</li>
+                <li>Use this daily to avoid emotional or UI-driven buys</li>
+            `;
+
+            // Show results section
+            document.getElementById('results').style.display = 'block';
+
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Load saved values on page load
+        loadSavedValues();
+
+        // Auto-save on input change
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', saveValues);
+        });
+
+        // Allow Enter key to trigger calculation
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    calculate();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
