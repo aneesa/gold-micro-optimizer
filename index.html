@@ -63,7 +63,7 @@
 
         .input-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -116,13 +116,20 @@
             transform: translateY(0);
         }
 
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 20px;
+        }
+
         .results-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
+            min-width: 600px;
         }
 
         .results-table thead {
@@ -168,6 +175,41 @@
             padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
+        }
+
+        .recommendation-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .recommendation-card {
+            background: #fecaca;
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid #b91c1c;
+            flex: 1 1 260px;
+            max-width: 350px;
+            min-width: 0;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .recommendation-card p {
+            margin: 0;
+            color: #7f1d1d;
+        }
+
+        .recommendation-card-main {
+            font-size: 0.95em;
+            margin-bottom: 6px;
+        }
+
+        .recommendation-card-value {
+            font-size: 1.2em;
+            font-weight: 700;
+            line-height: 1.4;
         }
 
         .recommendation h3 {
@@ -253,6 +295,21 @@
             font-size: 0.9em;
         }
 
+        .range-card {
+            background: #fff7ed;
+            border-radius: 12px;
+            border: 1px solid #fed7aa;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+        }
+
+        .range-card-title {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #9a3412;
+            margin-bottom: 10px;
+        }
+
         .info-box p {
             color: #0d47a1;
             margin: 0;
@@ -272,18 +329,93 @@
             color: #1976D2;
         }
 
+        @media (max-width: 900px) {
+            .container {
+                margin: 0 10px;
+                border-radius: 16px;
+            }
+        }
+
         @media (max-width: 768px) {
-            .input-group {
-                grid-template-columns: 1fr;
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .content {
+                padding: 20px;
             }
 
             .results-table {
                 font-size: 0.9em;
             }
+        }
 
-            .results-table th,
+        @media (max-width: 680px) {
+            .input-group {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .results-table {
+                min-width: 0;
+                border: 0;
+            }
+
+            .results-table thead {
+                display: none;
+            }
+
+            .results-table tbody tr {
+                display: flex;
+                flex-direction: column;
+                border: 1px solid #e0e0e0;
+                margin: 0 auto 10px;
+                border-radius: 8px;
+                overflow: hidden;
+                background: #fff;
+                max-width: 350px;
+                width: 100%;
+            }
+
+            .results-table tbody tr:hover {
+                background: #fff;
+            }
+
             .results-table td {
-                padding: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 14px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .results-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #555;
+                margin-right: 12px;
+            }
+
+            .results-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+
+            .table-container {
+                overflow-x: visible;
+                margin-top: 12px;
+            }
+        }
+
+        @media (max-width: 425px) {
+            .input-group {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -310,31 +442,25 @@
                         <input type="number" id="bankBuyback" step="0.01" placeholder="e.g., 643.00">
                     </div>
                 </div>
-                <div class="input-group">
-                    <div class="input-field">
-                        <label for="p015">Price for 0.015g (RM)</label>
-                        <input type="number" id="p015" step="0.01" placeholder="e.g., 10.00">
+                <div class="range-card">
+                    <div class="range-card-title">Micro gold gram range</div>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="startGram">Start gram (g)</label>
+                            <input type="number" id="startGram" step="0.001" placeholder="e.g., 0.015">
+                        </div>
+                        <div class="input-field">
+                            <label for="endGram">End gram (g)</label>
+                            <input type="number" id="endGram" step="0.001" placeholder="e.g., 0.025">
+                        </div>
+                        <div class="input-field">
+                            <label for="stepGram">Step (g)</label>
+                            <input type="number" id="stepGram" step="0.001" placeholder="e.g., 0.001">
+                        </div>
                     </div>
-                    <div class="input-field">
-                        <label for="p016">Price for 0.016g (RM)</label>
-                        <input type="number" id="p016" step="0.01" placeholder="e.g., 10.19">
-                    </div>
-                    <div class="input-field">
-                        <label for="p017">Price for 0.017g (RM)</label>
-                        <input type="number" id="p017" step="0.01" placeholder="e.g., 10.85">
-                    </div>
-                    <div class="input-field">
-                        <label for="p018">Price for 0.018g (RM)</label>
-                        <input type="number" id="p018" step="0.01" placeholder="e.g., 11.51">
-                    </div>
-                    <div class="input-field">
-                        <label for="p020">Price for 0.020g (RM)</label>
-                        <input type="number" id="p020" step="0.01" placeholder="e.g., 12.82">
-                    </div>
-                    <div class="input-field">
-                        <label for="p025">Price for 0.025g (RM)</label>
-                        <input type="number" id="p025" step="0.01" placeholder="e.g., 16.11">
-                    </div>
+                </div>
+                <div class="input-group" id="priceInputs">
+                    <!-- Dynamic price inputs will be injected here -->
                 </div>
                 <button class="btn" onclick="calculate()">Calculate</button>
             </div>
@@ -342,50 +468,49 @@
             <div id="results" style="display: none;">
                 <div class="section">
                     <div class="section-title">Individual Micro Gold Calculations</div>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>Gram</th>
-                                <th>RM</th>
-                                <th>RM/g</th>
-                                <th>Bank Value</th>
-                                <th>Profit/Loss</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultsBody">
-                        </tbody>
-                    </table>
+                    <div class="table-container" role="region" aria-label="Individual micro gold calculation results">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Gram</th>
+                                    <th>RM</th>
+                                    <th>RM/g</th>
+                                    <th>Bank Value</th>
+                                    <th>Profit/Loss</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="section">
                     <div class="section-title">Calculation to Reach ~1g (Rounded Up Units)</div>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>Gram</th>
-                                <th>Units</th>
-                                <th>Total (g)</th>
-                                <th>Total (RM)</th>
-                                <th>Actual RM/g</th>
-                                <th>Bank Value</th>
-                            </tr>
-                        </thead>
-                        <tbody id="roundedResultsBody">
-                        </tbody>
-                    </table>
+                    <div class="table-container" role="region" aria-label="Rounded-up units calculation to reach approximately 1 gram">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Gram</th>
+                                    <th>Units</th>
+                                    <th>Total (g)</th>
+                                    <th>Total (RM)</th>
+                                    <th>Actual RM/g</th>
+                                    <th>Bank Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roundedResultsBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div id="recommendation"></div>
-
-                <div class="summary">
-                    <div class="section-title">Decision Summary</div>
-                    <ul id="summaryList"></ul>
-                </div>
             </div>
 
             <div class="disclaimer">
                 <h4>📝 Note</h4>
-                <p>This web page is based on <a href="https://goldcalculator-sikucing.vercel.app/" target="_blank" rel="noopener noreferrer">Kalkulator Emas by Si Kucing</a>.</p>
+                <p>This web page is inspired by <a href="https://goldcalculator-sikucing.vercel.app/" target="_blank" rel="noopener noreferrer">Kalkulator Emas by Si Kucing</a>.</p>
                 <p>This tool is designed to help users buying micro gold from <a href="https://www.maybank.com/islamic/en/investment/maybank-islamic-gold-account-i.page" target="_blank" rel="noopener noreferrer">Maybank Islamic Gold Account-i</a>.</p>
                 
                 <h4>⚠️ Penafian (Disclaimer)</h4>
@@ -401,30 +526,119 @@
 
     <script>
         // Load saved values from localStorage
+        function generatePriceInputs() {
+            const startGram = parseFloat(document.getElementById('startGram').value);
+            const endGram = parseFloat(document.getElementById('endGram').value);
+            const stepGram = parseFloat(document.getElementById('stepGram').value);
+            const container = document.getElementById('priceInputs');
+
+            container.innerHTML = '';
+
+            if (!startGram || !endGram || !stepGram || startGram <= 0 || endGram <= 0 || stepGram <= 0 || endGram < startGram) {
+                return;
+            }
+
+            const startMg = Math.round(startGram * 1000);
+            const endMg = Math.round(endGram * 1000);
+            const stepMg = Math.round(stepGram * 1000);
+
+            for (let gMg = startMg; gMg <= endMg; gMg += stepMg) {
+                const gramValue = gMg / 1000;
+                const gramLabel = gramValue.toFixed(3);
+
+                const field = document.createElement('div');
+                field.className = 'input-field';
+
+                const label = document.createElement('label');
+                label.htmlFor = `price-${gramLabel}`;
+                label.textContent = `Price for ${gramLabel}g (RM)`;
+
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.id = `price-${gramLabel}`;
+                input.step = '0.01';
+                input.placeholder = 'e.g., 10.00';
+                input.className = 'price-input';
+                input.dataset.gram = gramLabel;
+
+                field.appendChild(label);
+                field.appendChild(input);
+                container.appendChild(field);
+            }
+        }
+
         function loadSavedValues() {
             const saved = localStorage.getItem('goldOptimizer');
             if (saved) {
                 const values = JSON.parse(saved);
+
                 document.getElementById('bankBuyback').value = values.bankBuyback || '';
-                document.getElementById('p015').value = values.p015 || '';
-                document.getElementById('p016').value = values.p016 || '';
-                document.getElementById('p017').value = values.p017 || '';
-                document.getElementById('p018').value = values.p018 || '';
-                document.getElementById('p020').value = values.p020 || '';
-                document.getElementById('p025').value = values.p025 || '';
+
+                if (values.startGram && values.endGram && values.stepGram) {
+                    document.getElementById('startGram').value = values.startGram;
+                    document.getElementById('endGram').value = values.endGram;
+                    document.getElementById('stepGram').value = values.stepGram;
+                    generatePriceInputs();
+
+                    if (Array.isArray(values.prices)) {
+                        values.prices.forEach(p => {
+                            const input = document.querySelector(`.price-input[data-gram="${p.gram}"]`);
+                            if (input) {
+                                input.value = p.price;
+                            }
+                        });
+                    }
+                } else {
+                    // Backwards compatibility: use old fixed grams
+                    document.getElementById('startGram').value = '0.015';
+                    document.getElementById('endGram').value = '0.025';
+                    document.getElementById('stepGram').value = '0.001';
+                    generatePriceInputs();
+
+                    const mapping = [
+                        { id: 'p015', gram: '0.015' },
+                        { id: 'p016', gram: '0.016' },
+                        { id: 'p017', gram: '0.017' },
+                        { id: 'p018', gram: '0.018' },
+                        { id: 'p020', gram: '0.020' },
+                        { id: 'p025', gram: '0.025' }
+                    ];
+
+                    mapping.forEach(m => {
+                        const oldVal = values[m.id];
+                        if (oldVal !== undefined) {
+                            const input = document.querySelector(`.price-input[data-gram="${m.gram}"]`);
+                            if (input) {
+                                input.value = oldVal;
+                            }
+                        }
+                    });
+                }
+            } else {
+                // Defaults when nothing saved yet
+                document.getElementById('startGram').value = '0.015';
+                document.getElementById('endGram').value = '0.025';
+                document.getElementById('stepGram').value = '0.001';
+                generatePriceInputs();
             }
         }
 
-        // Save values to localStorage
         function saveValues() {
+            const prices = [];
+            document.querySelectorAll('.price-input').forEach(input => {
+                const gram = input.dataset.gram;
+                const price = input.value;
+                if (gram && price !== '') {
+                    prices.push({ gram, price });
+                }
+            });
+
             const values = {
                 bankBuyback: document.getElementById('bankBuyback').value,
-                p015: document.getElementById('p015').value,
-                p016: document.getElementById('p016').value,
-                p017: document.getElementById('p017').value,
-                p018: document.getElementById('p018').value,
-                p020: document.getElementById('p020').value,
-                p025: document.getElementById('p025').value
+                startGram: document.getElementById('startGram').value,
+                endGram: document.getElementById('endGram').value,
+                stepGram: document.getElementById('stepGram').value,
+                prices
             };
             localStorage.setItem('goldOptimizer', JSON.stringify(values));
         }
@@ -437,14 +651,14 @@
                 return;
             }
 
-            const options = [
-                { gram: 0.015, price: parseFloat(document.getElementById('p015').value) || 0 },
-                { gram: 0.016, price: parseFloat(document.getElementById('p016').value) || 0 },
-                { gram: 0.017, price: parseFloat(document.getElementById('p017').value) || 0 },
-                { gram: 0.018, price: parseFloat(document.getElementById('p018').value) || 0 },
-                { gram: 0.020, price: parseFloat(document.getElementById('p020').value) || 0 },
-                { gram: 0.025, price: parseFloat(document.getElementById('p025').value) || 0 }
-            ];
+            const options = [];
+            document.querySelectorAll('.price-input').forEach(input => {
+                const gram = parseFloat(input.dataset.gram);
+                const price = parseFloat(input.value) || 0;
+                if (gram && gram > 0) {
+                    options.push({ gram, price });
+                }
+            });
 
             // Filter out options with zero price
             const validOptions = options.filter(opt => opt.price > 0);
@@ -482,8 +696,10 @@
             });
 
             // Calculate rounded-up units to reach ~1g
-            let bestActualMicro = null;
+            let bestActualMicro = null;       // best by lowest actual RM/g
             let bestActualRmPerG = Infinity;
+            let bestTotalOption = null;       // best by lowest total RM
+            let lowestTotalCost = Infinity;
             const roundedResults = [];
 
             validOptions.forEach(opt => {
@@ -499,14 +715,16 @@
                 const actualRmPerG = totalCost / totalGrams;
                 const bankValueTotal = totalGrams * bankBuyback;
 
-                roundedResults.push({
+                const roundedEntry = {
                     gram: opt.gram,
                     units: unitsNeeded,
                     totalGrams: totalGrams,
                     totalCost: totalCost,
                     actualRmPerG: actualRmPerG,
                     bankValue: bankValueTotal
-                });
+                };
+
+                roundedResults.push(roundedEntry);
 
                 if (actualRmPerG < bestActualRmPerG) {
                     bestActualRmPerG = actualRmPerG;
@@ -515,6 +733,18 @@
                         units: unitsNeeded,
                         totalGrams: totalGrams,
                         totalCost: totalCost
+                    };
+                }
+
+                // Track option with lowest total RM (for table highlight)
+                if (totalCost < lowestTotalCost) {
+                    lowestTotalCost = totalCost;
+                    bestTotalOption = {
+                        gram: opt.gram,
+                        units: unitsNeeded,
+                        totalGrams: totalGrams,
+                        totalCost: totalCost,
+                        actualRmPerG: actualRmPerG
                     };
                 }
             });
@@ -532,11 +762,11 @@
                 }
 
                 row.innerHTML = `
-                    <td>${result.gram.toFixed(3)}g</td>
-                    <td>RM${result.price.toFixed(2)}</td>
-                    <td>RM${result.rmPerG.toFixed(2)}/g</td>
-                    <td>RM${result.bankValue.toFixed(2)}</td>
-                    <td class="${result.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                    <td data-label="Gram">${result.gram.toFixed(3)}g</td>
+                    <td data-label="RM">RM${result.price.toFixed(2)}</td>
+                    <td data-label="RM/g">RM${result.rmPerG.toFixed(2)}/g</td>
+                    <td data-label="Bank Value">RM${result.bankValue.toFixed(2)}</td>
+                    <td data-label="Profit/Loss" class="${result.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
                         RM${result.profit >= 0 ? '+' : ''}${result.profit.toFixed(2)}
                     </td>
                 `;
@@ -549,19 +779,22 @@
 
             roundedResults.forEach(result => {
                 const row = document.createElement('tr');
-                const isBest = result.gram === bestActualMicro.gram;
+                const isBest = bestTotalOption &&
+                    result.gram === bestTotalOption.gram &&
+                    result.units === bestTotalOption.units &&
+                    result.totalCost === bestTotalOption.totalCost;
                 
                 if (isBest) {
                     row.className = 'best-row';
                 }
 
                 row.innerHTML = `
-                    <td>${result.gram.toFixed(3)}g</td>
-                    <td>${result.units}</td>
-                    <td>${result.totalGrams.toFixed(3)}g</td>
-                    <td>RM${result.totalCost.toFixed(2)}</td>
-                    <td>RM${result.actualRmPerG.toFixed(2)}/g</td>
-                    <td>RM${result.bankValue.toFixed(2)}</td>
+                    <td data-label="Gram">${result.gram.toFixed(3)}g</td>
+                    <td data-label="Units">${result.units}</td>
+                    <td data-label="Total (g)">${result.totalGrams.toFixed(3)}g</td>
+                    <td data-label="Total (RM)">RM${result.totalCost.toFixed(2)}</td>
+                    <td data-label="Actual RM/g">RM${result.actualRmPerG.toFixed(2)}/g</td>
+                    <td data-label="Bank Value">RM${result.bankValue.toFixed(2)}</td>
                 `;
                 roundedTbody.appendChild(row);
             });
@@ -570,21 +803,20 @@
             const recommendationDiv = document.getElementById('recommendation');
             recommendationDiv.innerHTML = `
                 <div class="recommendation">
-                    <h3>⭐ Best Recommendation (Lowest Actual RM/g)</h3>
-                    <p><strong>Best option:</strong> ${bestActualMicro.gram.toFixed(3)}g - Buy ${bestActualMicro.units} units = ${bestActualMicro.totalGrams.toFixed(3)}g @ RM${bestActualMicro.totalCost.toFixed(2)}</p>
-                    <p>This has the lowest actual RM/g (${bestActualRmPerG.toFixed(2)} RM/g) when buying units to reach ~1g.</p>
-                    <p><em>Note: Units are rounded up to reach at least 1g, so actual grams may be slightly more.</em></p>
+                    <h3>⭐ Best Recommendation (Lowest RM/g)</h3>
+                    <div class="recommendation-cards">
+                        <div class="recommendation-card">
+                            <p class="recommendation-card-main">If you want to buy <strong> < 1g</strong> of gold:</p>
+                            <p class="recommendation-card-value">${bestActualMicro.gram.toFixed(3)}g</p>
+                            <p class="recommendation-card-main">(equivalent to <strong>RM${bestActualRmPerG.toFixed(2)}/g</strong>)</p>
+                        </div>
+                        <div class="recommendation-card">
+                            <p class="recommendation-card-main">If you want to buy <strong>1g</strong> of gold:</p>
+                            <p class="recommendation-card-value">${bestTotalOption.gram.toFixed(3)}g × ${bestTotalOption.units} times</p>
+                            <p class="recommendation-card-main">(total <strong>RM${bestTotalOption.totalCost.toFixed(2)}</strong>)</p>
+                        </div>
+                    </div>
                 </div>
-            `;
-
-            // Display summary
-            const summaryList = document.getElementById('summaryList');
-            summaryList.innerHTML = `
-                <li>Recommendation: ${bestActualMicro.gram.toFixed(3)}g - Buy ${bestActualMicro.units} units = ${bestActualMicro.totalGrams.toFixed(3)}g @ RM${bestActualMicro.totalCost.toFixed(2)} (lowest actual RM/g)</li>
-                <li>This gives you the most gold for your money</li>
-                <li>Units are rounded up to reach at least 1g, so actual grams may be slightly more</li>
-                <li>Negative profit means paying premium for accumulation</li>
-                <li>Use this daily to avoid emotional or UI-driven buys</li>
             `;
 
             // Show results section
@@ -597,18 +829,27 @@
         // Load saved values on page load
         loadSavedValues();
 
-        // Auto-save on input change
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('change', saveValues);
+        // Regenerate inputs when range changes
+        ['startGram', 'endGram', 'stepGram'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('change', () => {
+                generatePriceInputs();
+                saveValues();
+            });
+        });
+
+        // Auto-save on input change (delegated)
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.tagName === 'INPUT') {
+                saveValues();
+            }
         });
 
         // Allow Enter key to trigger calculation
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    calculate();
-                }
-            });
+        document.addEventListener('keypress', function(e) {
+            if (e.target && e.target.tagName === 'INPUT' && e.key === 'Enter') {
+                calculate();
+            }
         });
     </script>
 </body>
