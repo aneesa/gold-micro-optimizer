@@ -68,6 +68,10 @@
             margin-bottom: 20px;
         }
 
+        .input-group-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
         .input-field {
             display: flex;
             flex-direction: column;
@@ -436,10 +440,14 @@
                     <p><strong>📝 Note:</strong> Previous values are automatically loaded. Please update these values if there are any changes to the current prices.</p>
                 </div>
 
-                <div class="input-group">
+                <div class="input-group input-group-2">
                     <div class="input-field">
                         <label for="bankBuyback">Bank Buy-back Price (RM per 1g)</label>
                         <input type="number" id="bankBuyback" step="0.01" placeholder="e.g., 643.00">
+                    </div>
+                    <div class="input-field">
+                        <label for="monthlyTargetGrams">Monthly target gold amount (g)</label>
+                        <input type="number" id="monthlyTargetGrams" step="0.001" placeholder="e.g., 1.000" value="1">
                     </div>
                 </div>
                 <div class="range-card">
@@ -573,6 +581,7 @@
                 const values = JSON.parse(saved);
 
                 document.getElementById('bankBuyback').value = values.bankBuyback || '';
+                document.getElementById('monthlyTargetGrams').value = values.monthlyTargetGrams !== undefined && values.monthlyTargetGrams !== '' ? values.monthlyTargetGrams : '1';
 
                 if (values.startGram && values.endGram && values.stepGram) {
                     document.getElementById('startGram').value = values.startGram;
@@ -616,6 +625,7 @@
                 }
             } else {
                 // Defaults when nothing saved yet
+                document.getElementById('monthlyTargetGrams').value = '1';
                 document.getElementById('startGram').value = '0.015';
                 document.getElementById('endGram').value = '0.025';
                 document.getElementById('stepGram').value = '0.001';
@@ -635,6 +645,7 @@
 
             const values = {
                 bankBuyback: document.getElementById('bankBuyback').value,
+                monthlyTargetGrams: document.getElementById('monthlyTargetGrams').value,
                 startGram: document.getElementById('startGram').value,
                 endGram: document.getElementById('endGram').value,
                 stepGram: document.getElementById('stepGram').value,
@@ -643,32 +654,53 @@
             localStorage.setItem('goldOptimizer', JSON.stringify(values));
         }
 
-        // Calculate and display results
-        function calculate() {
-            const bankBuyback = parseFloat(document.getElementById('bankBuyback').value);
-            if (!bankBuyback || bankBuyback <= 0) {
-                alert('Please enter a valid bank buy-back price');
+        // Populate price inputs from buy-back: price = buy-back × gram
+        function fillPricesFromBuyback() {
+            const buyBack = parseFloat(document.getElementById('bankBuyback').value);
+            if (!buyBack || buyBack <= 0) {
+                // If buy-back is cleared/invalid, clear derived prices too
+                document.querySelectorAll('.price-input').forEach(input => {
+                    input.value = '';
+                });
+                saveValues();
                 return;
             }
 
-            const options = [];
             document.querySelectorAll('.price-input').forEach(input => {
                 const gram = parseFloat(input.dataset.gram);
-                const price = parseFloat(input.value) || 0;
                 if (gram && gram > 0) {
-                    options.push({ gram, price });
+                    input.value = (buyBack * gram).toFixed(2);
+                }
+            });
+            saveValues();
+        }
+
+        // Calculate and display results
+        function calculate() {
+            const bankBuybackInput = document.getElementById('bankBuyback');
+            const bankBuyback = parseFloat(bankBuybackInput.value);
+            if (!bankBuyback || bankBuyback <= 0) {
+                alert('Please enter a valid bank buy-back price');
+                bankBuybackInput.focus();
+                return;
+            }
+
+            // IMPORTANT: do NOT overwrite user-edited prices here.
+            // Use whatever is currently in the price inputs (pre-filled or manually adjusted).
+            const validOptions = [];
+            document.querySelectorAll('.price-input').forEach(input => {
+                const gram = parseFloat(input.dataset.gram);
+                const price = parseFloat(input.value);
+                if (gram && gram > 0 && Number.isFinite(price) && price > 0) {
+                    validOptions.push({ gram, price });
                 }
             });
 
-            // Filter out options with zero price
-            const validOptions = options.filter(opt => opt.price > 0);
-
             if (validOptions.length === 0) {
-                alert('Please enter at least one price');
                 return;
             }
 
-            // Save values
+            // Save values (including any manual tweaks)
             saveValues();
 
             // Calculate for each option (theoretical per unit)
@@ -799,6 +831,17 @@
                 roundedTbody.appendChild(row);
             });
 
+            // Monthly card:
+            // n = ceil((target gold / days in current month) / bestActualMicro.gram)
+            const monthlyTargetGrams = parseFloat(document.getElementById('monthlyTargetGrams').value) || 1;
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const dailyTarget = monthlyTargetGrams / daysInMonth;
+            const roundedBestGram = parseFloat(bestActualMicro.gram.toFixed(3));
+            const nMonthly = Math.max(1, Math.ceil(dailyTarget / roundedBestGram));
+            const bestMicroPricePerUnit = validOptions.find(o => o.gram === bestActualMicro.gram)?.price ?? 0;
+            const monthlyTotalCost = bestMicroPricePerUnit * nMonthly;
+
             // Display recommendation based on actual RM/g
             const recommendationDiv = document.getElementById('recommendation');
             recommendationDiv.innerHTML = `
@@ -815,6 +858,11 @@
                             <p class="recommendation-card-value">${bestTotalOption.gram.toFixed(3)}g × ${bestTotalOption.units} times</p>
                             <p class="recommendation-card-main">(total <strong>RM${bestTotalOption.totalCost.toFixed(2)}</strong>)</p>
                         </div>
+                        <div class="recommendation-card">
+                            <p class="recommendation-card-main">If you want to buy <strong>1g</strong> of gold this <strong>month</strong>:</p>
+                            <p class="recommendation-card-value">RM${bestMicroPricePerUnit.toFixed(2)} (${bestActualMicro.gram.toFixed(3)}g) × ${nMonthly} times</p>
+                            <p class="recommendation-card-main">(total <strong>RM${monthlyTotalCost.toFixed(2)}</strong>)</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -829,11 +877,15 @@
         // Load saved values on page load
         loadSavedValues();
 
-        // Regenerate inputs when range changes
+        // When buy-back price changes, auto-fill price inputs (price = buy-back × gram)
+        document.getElementById('bankBuyback').addEventListener('input', fillPricesFromBuyback);
+
+        // Regenerate inputs when range changes; re-fill from buy-back if set
         ['startGram', 'endGram', 'stepGram'].forEach(id => {
             const el = document.getElementById(id);
             el.addEventListener('change', () => {
                 generatePriceInputs();
+                fillPricesFromBuyback(); // populates new inputs if buy-back is set
                 saveValues();
             });
         });
